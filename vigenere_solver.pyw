@@ -8,100 +8,52 @@ import tkinter
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from functools import partial
 
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
 specialChars = "[@_!#$%^&*()<>?/\|}{~:]'"
 
-def decrypt():
-    ################################################
-    #
-    # Variable Declaration
-    #
-    ################################################
+def solve(oper):
     msgCount = 0
     keyCount = 0
-    decrOut = ""
-    msg = msgInput.get(1.0, END).lower()
-    key = keyInput.get(1.0, END).lower()
-    keyLen=len(key)
-
+    out = ""
+    msg = msgInput.get(1.0, "end-1c").lower()
+    print(type(msg))
+    key = keyInput.get(1.0, "end-1c").lower()
     if not msg:
-        emptyMsg = messagebox.showerror("Empty Input!", "No entry was detected, please try again!")
+        messagebox.showerror("Empty Input!", "No entry was detected, please try again!")
         return
     if ' ' in key:
-        spaceMsg = messagebox.showerror("Space in Key!", "Please do not use any spaces in the key!")
+        messagebox.showerror("Space in Key!", "Please do not use any spaces in the key!")
         return
     for i in msg:
-        if keyCount == keyLen:
+        if keyCount == len(key):
             keyCount = 0
         if i in specialChars:
             print ("SPECIAL CHAR: " + i)
-            decrOut += i
+            out += i
             continue
         elif i.isspace():
             print("SPACE")
-            decrOut += i
+            out += i
             continue
         msgNum = alphabet.find(i)
         keyNum = alphabet.find(key[keyCount])
         print("This is msgNum: " + str(msgNum))
         print("This is keyNum: " + str(keyNum))
-        decrNum = alphabet[((msgNum - keyNum)%26)]
-        decrOut += decrNum
+        if oper == "decrypt":
+            decrNum = alphabet[((msgNum - keyNum)%26)]
+            out += decrNum
+        if oper == "encrypt":
+            encrNum = alphabet[((msgNum + keyNum)%26)]
+            out += encrNum
         msgCount+=1
         keyCount+=1
-    charCount = 27 + len(decrOut)
+    charCount = 27 + len(out)
     decrBox = Toplevel(width=1)
     decrLable = Text(decrBox, height=1, width=charCount, wrap=WORD)
-    decrLable.insert(1.0, ("Your decrypted message is: " + decrOut))
+    decrLable.insert(1.0, ("Your " + oper + "ed message is: " + out))
     decrLable.pack()
-
-    return
-
-def encrypt():
-    ################################################
-    #
-    # Variable Declaration
-    #
-    ################################################
-    msgCount = 0
-    keyCount = 0
-    encrOut = ""
-    msg = msgInput.get(1.0, END).lower()
-    key = keyInput.get(1.0, END).lower()
-    keyLen=len(key)
-
-    if not msg:
-        emptyMsg = messagebox.showerror("Empty Input!", "No entry was detected, please try again!")
-        return
-    if ' ' in key:
-        spaceMsg = messagebox.showerror("Space in Key!", "Please do not use any spaces in the key!")
-        return
-    for i in msg:
-        if keyCount == keyLen:
-            keyCount = 0
-        if i.isspace():
-            print("SPACE")
-            encrOut += i
-            continue
-        if i in specialChars:
-            print ("SPECIAL CHAR: " + i)
-            encrOut += i
-            continue
-        msgNum = alphabet.find(i)
-        keyNum = alphabet.find(key[keyCount])
-        print("This is msgNum: " + str(msgNum))
-        print("This is keyNum: " + str(keyNum))
-        encrNum = alphabet[((msgNum + keyNum)%26)]
-        encrOut += encrNum
-        msgCount+=1
-        keyCount+=1
-    charCount = 27 + len(encrOut)
-    encrBox = Toplevel(width=1)
-    encrLable = Text(encrBox, height=1, width=charCount, wrap=WORD)
-    encrLable.insert(1.0, ("Your encrypted message is: " + encrOut))
-    encrLable.pack()
-
     return
 
 ########################################################
@@ -116,8 +68,8 @@ msgLabel = Label(main, text="Please enter the message")
 keyLabel = Label(main, text="Please enter the key")
 msgInput = Text(main, height = 1, width = 30)
 keyInput = Text(main, height = 1, width = 30)
-encrButt = Button(main, text = "Encrypt!", command = encrypt)
-decrButt = Button(main, text = "Decrypt!", command = decrypt)
+encrButt = Button(main, text = "Encrypt!", command=partial(solve, "encrypt"))
+decrButt = Button(main, text = "Decrypt!", command=partial(solve, "decrypt"))
 
 msgLabel.grid(row = 0, column = 0)
 msgInput.grid(row = 0, column = 1)
